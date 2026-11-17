@@ -43,15 +43,19 @@ Danach neu bauen:
 python tools/build-cards/build.py
 ```
 
-## Grafik ersetzen
+## Grafik
 
-Die SVGs in `art/` sind **handgebaute Platzhalter**, keine Illustrationen im Zielstil.
-Ersetzen geht ohne Codeänderung: einfach `art/<id>.png` (oder `.jpg` / `.webp`) neben das
-SVG legen — der Builder nimmt automatisch das Bild statt der SVG.
+Die 14 Illustrationen liegen als PNG in `art/`. Der Builder skaliert sie beim Einbau auf
+1100 px Breite herunter und bettet sie als JPEG ein — sonst würde das PDF durch die
+65-fache Verwendung explodieren.
 
-- Format: quadratisch oder 16:9, mindestens 900 px breit
-- Der Bildausschnitt wird mittig beschnitten (`object-fit: cover`)
+Ersetzen ohne Codeänderung: `art/<id>.png` austauschen (oder `.jpg` / `.webp` daneben
+legen). Die SVGs sind nur Fallback, falls ein Bild fehlt.
+
+- Format: 16:9, mindestens 900 px breit
+- Der Bildausschnitt wird mittig auf 57 × 40 mm beschnitten (`background-size: cover`)
 - IDs stehen im Feld `art` in `cards.json`
+- Bild-Briefing: `art/PROMPTS.md`
 
 ## Struktur
 
@@ -83,3 +87,4 @@ amt-und-ordnung/
 
 - Python 3.10+
 - `playwright` (`pip install playwright`) — nutzt das installierte Chrome, kein Browser-Download nötig
+- `pillow` (`pip install pillow`) — verkleinert die Illustrationen für den Druck

@@ -1,6 +1,9 @@
 # AGENTS.md — Auftrag für den Bild-Agenten
 
-Dieses Repository enthält ein Kartenspiel in Entwicklung. **Deine einzige Aufgabe: die 14
+> **Status: erledigt.** Die 14 Illustrationen liegen als `art/*.png` vor. Diese Datei
+> gilt, wenn Motive überarbeitet oder ergänzt werden sollen.
+
+Dieses Repository enthält ein Kartenspiel in Entwicklung. **Deine einzige Aufgabe: die
 Karten-Illustrationen erzeugen.** Ändere nichts anderes.
 
 ---

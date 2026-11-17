@@ -133,6 +133,14 @@ body {
   object-position: center;
 }
 
+.shot {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
 .art .stamp {
   position: absolute;
   right: 1.2mm;

@@ -1,6 +1,7 @@
 """Baut aus data/cards.json ein druckfertiges A4-PDF (9 Karten pro Seite)."""
 
 import html
+import io
 import json
 import sys
 from base64 import b64encode
@@ -24,6 +25,10 @@ LABELS = {
 
 PER_SHEET = 9
 
+# Zielbreite der eingebetteten Bilder. 57 mm Kartenbreite bei 400 dpi = ~900 px.
+ART_WIDTH = 1100
+ART_QUALITY = 92
+
 
 def color_of(card: dict) -> str:
     if card["category"] == "dokument":
@@ -39,17 +44,48 @@ def expand(cards: list[dict]) -> list[dict]:
     return deck
 
 
-def render_card(card: dict, number: int, total: int, art_svg: str) -> str:
-    e = html.escape
-    color = color_of(card)
-    icon = art_gen.ICONS[card["icon"]]
-    label = LABELS[card["category"]]
+def encode_image(path: Path) -> str:
+    """Verkleinert das Bild und gibt es als base64-JPEG zurueck."""
+    from PIL import Image
 
+    img = Image.open(path)
+    if img.mode in ("RGBA", "LA", "P"):
+        img = img.convert("RGBA")
+        flat = Image.new("RGB", img.size, (244, 241, 232))
+        flat.paste(img, mask=img.split()[-1])
+        img = flat
+    else:
+        img = img.convert("RGB")
+
+    if img.width > ART_WIDTH:
+        height = round(img.height * ART_WIDTH / img.width)
+        img = img.resize((ART_WIDTH, height), Image.LANCZOS)
+
+    buf = io.BytesIO()
+    img.save(buf, format="JPEG", quality=ART_QUALITY, optimize=True, progressive=True)
+    return b64encode(buf.getvalue()).decode("ascii")
+
+
+def load_art(stem: str) -> tuple[str, str, bool]:
+    """Liefert (CSS-Regel, Karten-Markup, ist_platzhalter)."""
+    for ext in ("png", "jpg", "jpeg", "webp"):
+        path = ROOT / "art" / f"{stem}.{ext}"
+        if path.exists():
+            data = encode_image(path)
+            css = f".shot-{stem}{{background-image:url(data:image/jpeg;base64,{data})}}"
+            return css, f'<div class="shot shot-{stem}"></div>', False
+
+    svg = (ROOT / "art" / f"{stem}.svg").read_text(encoding="utf-8")
+    return "", svg, True
+
+
+def render_card(card: dict, art: str, number: int, total: int) -> str:
+    e = html.escape
     return f"""
-<div class="card" style="--c:{color}">
+<div class="card" style="--c:{color_of(card)}">
   <div class="head">
     <div class="icon">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-linejoin="round">{icon}</svg>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-linejoin="round">{art_gen.ICONS[card["icon"]]}</svg>
     </div>
     <div class="titles">
       <div class="overline">Amt f&uuml;r allgemeine Ordnung &middot; Formular {card["no"]:03d}</div>
@@ -57,8 +93,8 @@ def render_card(card: dict, number: int, total: int, art_svg: str) -> str:
     </div>
   </div>
   <div class="art">
-    {art_svg}
-    <div class="stamp">{e(label)}</div>
+    {art}
+    <div class="stamp">{e(LABELS[card["category"]])}</div>
   </div>
   <div class="body">
     <div class="field">
@@ -75,38 +111,25 @@ def render_card(card: dict, number: int, total: int, art_svg: str) -> str:
 </div>"""
 
 
-def load_art(card: dict) -> tuple[str, bool]:
-    """Bevorzugt echtes Bild (png/jpg/webp), sonst die generierte SVG-Platzhalterillustration.
-
-    Rueckgabe: (HTML, ist_platzhalter)
-    """
-    stem = card["art"]
-    for ext, mime in (
-        ("png", "image/png"),
-        ("jpg", "image/jpeg"),
-        ("jpeg", "image/jpeg"),
-        ("webp", "image/webp"),
-    ):
-        path = ROOT / "art" / f"{stem}.{ext}"
-        if path.exists():
-            b64 = b64encode(path.read_bytes()).decode("ascii")
-            return f'<img src="data:{mime};base64,{b64}" alt="">', False
-    return (ROOT / "art" / f"{stem}.svg").read_text(encoding="utf-8"), True
-
-
 def build_html(cards: list[dict]) -> tuple[str, list[str]]:
     deck = expand(cards)
     total = len(deck)
 
     art = {}
+    css_rules = []
     placeholders = []
     for card in cards:
-        markup, is_placeholder = load_art(card)
+        rule, markup, is_placeholder = load_art(card["art"])
         art[card["art"]] = markup
+        if rule:
+            css_rules.append(rule)
         if is_placeholder:
             placeholders.append(card["name"])
 
-    rendered = [render_card(c, i + 1, total, art[c["art"]]) for i, c in enumerate(deck)]
+    rendered = [
+        render_card(card, art[card["art"]], i + 1, total)
+        for i, card in enumerate(deck)
+    ]
 
     sheets = []
     for start in range(0, len(rendered), PER_SHEET):
@@ -114,6 +137,7 @@ def build_html(cards: list[dict]) -> tuple[str, list[str]]:
         sheets.append('<div class="sheet">' + "".join(chunk) + "</div>")
 
     css = (Path(__file__).resolve().parent / "style.css").read_text(encoding="utf-8")
+    extra = "\n".join(css_rules)
 
     return f"""<!doctype html>
 <html lang="de">
@@ -122,6 +146,7 @@ def build_html(cards: list[dict]) -> tuple[str, list[str]]:
 <title>Amt &amp; Ordnung — Prototyp</title>
 <style>
 {css}
+{extra}
 </style>
 </head>
 <body>
@@ -164,13 +189,12 @@ def main() -> None:
     print(f"Deck:   {len(deck)} Karten aus {len(data['cards'])} Typen")
     print(f"Seiten: {pages}")
     if placeholders:
-        print(f"Artwork: {len(placeholders)} Motive sind noch SVG-Platzhalter "
-              f"(siehe art/PROMPTS.md):")
+        print(f"Artwork: {len(placeholders)} Motive sind noch SVG-Platzhalter:")
         for name in placeholders:
             print(f"         - {name}")
     else:
-        print("Artwork: alle Motive sind echte Bilder")
-    print(f"HTML:   {out_html}")
+        print("Artwork: alle 14 Motive sind echte Bilder")
+    print(f"HTML:   {out_html}  ({out_html.stat().st_size // 1024} KB)")
     print(f"PDF:    {pdf_path}  ({pdf_path.stat().st_size // 1024} KB)")
 
 
