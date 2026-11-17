@@ -352,12 +352,36 @@ Alle Texte müssen ab Tag 1 in einer `localization/`-Datei liegen. Kein String i
 
 ---
 
+## 10.1 Umsetzungsstand — 3D-Vertical-Slice (Godot 4.7)
+
+Umgesetzt:
+
+- Kellerraum, Tisch, Stühle, Requisiten — vollständig prozedural aus Primitiven, keine Modell-Dateien
+- Erste-Person-Kamera am Tisch, Blickneigung begrenzt, Umsehen per rechter Maustaste oder Pfeiltasten
+- Hand aus 5 Karten im Kameraraum, Anheben beim Überfahren (Physik-Raycast auf Kartenflächen)
+- Zieh- und Ablagestapel sichtbar, sobald der Zeiger nicht auf der Hand liegt
+- Drei Gegnerfiguren mit eigenem Kartenfächer, Blickbewegung und Atmung
+- Kartenoberflächen identisch zur Druckvorlage (gerendert aus `style.css`)
+
+Bewusste Festlegungen:
+
+- **Sichtbarer Zeiger statt Maus-Capture.** Karten-Hover braucht eine absolute
+  Zeigerposition, freies Umsehen braucht eine gefangene Maus. Beides gleichzeitig geht
+  nicht — also bleibt der Zeiger sichtbar und das Umsehen liegt auf der rechten Maustaste.
+- **Primitive statt Modelle.** Ohne Art-Skills ist ein stimmiger Raum aus Kästen,
+  Zylindern und Kugeln schneller erreichbar als mit gekauften Platzhalter-Modellen. Die
+  Figuren dürfen cartoonhaft sein; das passt zum Tusche-Stil der Karten.
+
+Noch offen: Regel-Engine, Karten ausspielen, Bots, Menü, Sound.
+
+---
+
 ## 11. Nächste Schritte
 
 1. **Papier-Prototyp** — 65 Karten drucken, 5 Runden spielen, Balancing notieren
 2. **Regel-Engine** (GDScript, engine-unabhängig) + Tests
 3. **Konsolen-Prototyp** — komplettes Spiel headless durchspielbar
-4. **Vertical Slice** — UI mit Platzhalter-Karten
+4. **Andocken der Engine an die 3D-Szene** — Karten ausspielen, Ziehen, Reaktionskette
 5. **Art-Pass** — ein Kartenlayout, final, als Vorlage für alle 65
 
 ---
