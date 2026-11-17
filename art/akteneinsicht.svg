@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 170"
+  shape-rendering="geometricPrecision"><defs>
+  <filter id="ink" x="-8%" y="-8%" width="116%" height="116%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.026" numOctaves="3" seed="11" result="n"/>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="3.4" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+  <pattern id="dots" width="10" height="10" patternUnits="userSpaceOnUse">
+    <circle cx="2" cy="2" r="1.5" fill="#1C1B18" opacity="0.20"/>
+  </pattern>
+  <pattern id="hatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(42)">
+    <line x1="0" y1="0" x2="0" y2="7" stroke="#1C1B18" stroke-width="1.5" opacity="0.42"/>
+  </pattern>
+  <pattern id="hatch2" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(-38)">
+    <line x1="0" y1="0" x2="0" y2="8" stroke="#1C1B18" stroke-width="1.2" opacity="0.26"/>
+  </pattern>
+</defs>
+<rect width="300" height="170" fill="#EFE2C0"/>
+<g opacity="0.5">
+  <path d="M150 120 L-30 -40 L40 -60 Z" fill="#fff" opacity="0.55"/>
+  <path d="M150 120 L340 -30 L300 -70 Z" fill="#fff" opacity="0.55"/>
+  <path d="M150 120 L120 200 L40 190 Z" fill="#1C1B18" opacity="0.10"/>
+  <path d="M150 120 L250 210 L330 175 Z" fill="#1C1B18" opacity="0.10"/>
+</g>
+<rect x="0" y="0" width="300" height="170" fill="url(#dots)" opacity="0.7"/>
+<rect x="0" y="142" width="300" height="28" fill="url(#hatch2)" opacity="0.55"/>
+
+  <g filter="url(#ink)">
+    <ellipse cx="150" cy="150" rx="74" ry="9" fill="url(#hatch)" opacity="0.55" stroke="none"/>
+    <g stroke="#1C1B18" stroke-width="4.6" stroke-linejoin="round" stroke-linecap="round">
+
+  <path d="M34 84 C74 40 226 40 266 84 C226 128 74 128 34 84 Z" fill="#F4F1E8"/>
+  <circle cx="150" cy="84" r="34" fill="#D9A521" opacity="0.35" stroke-width="5"/>
+  <circle cx="150" cy="84" r="18" fill="#1C1B18" stroke="none"/>
+  <circle cx="141" cy="75" r="6" fill="#fff" stroke="none"/>
+  <path d="M70 40 l-10 -12 M230 40 l10 -12" stroke-width="4"/>
+  <path d="M96 132 h30 M174 132 h30" stroke-width="3" opacity="0.45"/>
+
+    </g>
+  </g></svg>

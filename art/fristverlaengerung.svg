@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 170"
+  shape-rendering="geometricPrecision"><defs>
+  <filter id="ink" x="-8%" y="-8%" width="116%" height="116%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.026" numOctaves="3" seed="11" result="n"/>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="3.4" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+  <pattern id="dots" width="10" height="10" patternUnits="userSpaceOnUse">
+    <circle cx="2" cy="2" r="1.5" fill="#1C1B18" opacity="0.20"/>
+  </pattern>
+  <pattern id="hatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(42)">
+    <line x1="0" y1="0" x2="0" y2="7" stroke="#1C1B18" stroke-width="1.5" opacity="0.42"/>
+  </pattern>
+  <pattern id="hatch2" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(-38)">
+    <line x1="0" y1="0" x2="0" y2="8" stroke="#1C1B18" stroke-width="1.2" opacity="0.26"/>
+  </pattern>
+</defs>
+<rect width="300" height="170" fill="#CFD3CF"/>
+<g opacity="0.5">
+  <path d="M150 120 L-30 -40 L40 -60 Z" fill="#fff" opacity="0.55"/>
+  <path d="M150 120 L340 -30 L300 -70 Z" fill="#fff" opacity="0.55"/>
+  <path d="M150 120 L120 200 L40 190 Z" fill="#1C1B18" opacity="0.10"/>
+  <path d="M150 120 L250 210 L330 175 Z" fill="#1C1B18" opacity="0.10"/>
+</g>
+<rect x="0" y="0" width="300" height="170" fill="url(#dots)" opacity="0.7"/>
+<rect x="0" y="142" width="300" height="28" fill="url(#hatch2)" opacity="0.55"/>
+
+  <g filter="url(#ink)">
+    <ellipse cx="150" cy="150" rx="74" ry="9" fill="url(#hatch)" opacity="0.55" stroke="none"/>
+    <g stroke="#1C1B18" stroke-width="4.6" stroke-linejoin="round" stroke-linecap="round">
+
+  <path d="M46 140 H100 V110 H154 V80 H208 V50 H258" fill="none" stroke-width="6"/>
+  <g stroke="none">
+    <rect x="52" y="126" width="48" height="14" fill="#F4F1E8"/>
+    <rect x="106" y="96" width="48" height="14" fill="#F4F1E8"/>
+    <rect x="160" y="66" width="48" height="14" fill="#F4F1E8"/>
+  </g>
+  <g stroke-width="3" opacity="0.5">
+    <line x1="58" y1="133" x2="94" y2="133"/>
+    <line x1="112" y1="103" x2="148" y2="103"/>
+    <line x1="166" y1="73" x2="202" y2="73"/>
+  </g>
+  <path d="M228 34 h44 v34 h-44 z" fill="#1C1B18"/>
+  <path d="M236 34 v-9 h28 v9" fill="none" stroke-width="4"/>
+  <path d="M222 96 v18 M296 96 v18" stroke-width="5"/>
+
+    </g>
+  </g></svg>

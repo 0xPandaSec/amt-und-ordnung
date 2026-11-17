@@ -1,0 +1,178 @@
+"""Baut aus data/cards.json ein druckfertiges A4-PDF (9 Karten pro Seite)."""
+
+import html
+import json
+import sys
+from base64 import b64encode
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+import art_gen  # noqa: E402
+
+LABELS = {
+    "bedrohung": "Bedrohung",
+    "rettung": "Rettung",
+    "reaktion": "Reaktion",
+    "verzoegerung": "Verzögerung",
+    "information": "Information",
+    "kontrolle": "Kontrolle",
+    "interaktion": "Interaktion",
+    "dokument": "Dokument",
+}
+
+PER_SHEET = 9
+
+
+def color_of(card: dict) -> str:
+    if card["category"] == "dokument":
+        return art_gen.COLORS[card["id"]]
+    return art_gen.COLORS[card["category"]]
+
+
+def expand(cards: list[dict]) -> list[dict]:
+    deck = []
+    for card in cards:
+        for _ in range(card["copies"]):
+            deck.append(card)
+    return deck
+
+
+def render_card(card: dict, number: int, total: int, art_svg: str) -> str:
+    e = html.escape
+    color = color_of(card)
+    icon = art_gen.ICONS[card["icon"]]
+    label = LABELS[card["category"]]
+
+    return f"""
+<div class="card" style="--c:{color}">
+  <div class="head">
+    <div class="icon">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-linejoin="round">{icon}</svg>
+    </div>
+    <div class="titles">
+      <div class="overline">Amt f&uuml;r allgemeine Ordnung &middot; Formular {card["no"]:03d}</div>
+      <div class="title">{e(card["name"])}</div>
+    </div>
+  </div>
+  <div class="art">
+    {art_svg}
+    <div class="stamp">{e(label)}</div>
+  </div>
+  <div class="body">
+    <div class="field">
+      <div class="field-label">Wirkung</div>
+      <div class="effect">{e(card["effect"])}</div>
+      <div class="filler"><span>Aktenzeichen</span><i></i></div>
+    </div>
+    <div class="flavor">{e(card["flavor"])}</div>
+  </div>
+  <div class="foot">
+    <span>Nr. {number:03d} / {total:03d}</span>
+    <span>{card["copies"]}&times; im Deck</span>
+  </div>
+</div>"""
+
+
+def load_art(card: dict) -> tuple[str, bool]:
+    """Bevorzugt echtes Bild (png/jpg/webp), sonst die generierte SVG-Platzhalterillustration.
+
+    Rueckgabe: (HTML, ist_platzhalter)
+    """
+    stem = card["art"]
+    for ext, mime in (
+        ("png", "image/png"),
+        ("jpg", "image/jpeg"),
+        ("jpeg", "image/jpeg"),
+        ("webp", "image/webp"),
+    ):
+        path = ROOT / "art" / f"{stem}.{ext}"
+        if path.exists():
+            b64 = b64encode(path.read_bytes()).decode("ascii")
+            return f'<img src="data:{mime};base64,{b64}" alt="">', False
+    return (ROOT / "art" / f"{stem}.svg").read_text(encoding="utf-8"), True
+
+
+def build_html(cards: list[dict]) -> tuple[str, list[str]]:
+    deck = expand(cards)
+    total = len(deck)
+
+    art = {}
+    placeholders = []
+    for card in cards:
+        markup, is_placeholder = load_art(card)
+        art[card["art"]] = markup
+        if is_placeholder:
+            placeholders.append(card["name"])
+
+    rendered = [render_card(c, i + 1, total, art[c["art"]]) for i, c in enumerate(deck)]
+
+    sheets = []
+    for start in range(0, len(rendered), PER_SHEET):
+        chunk = rendered[start:start + PER_SHEET]
+        sheets.append('<div class="sheet">' + "".join(chunk) + "</div>")
+
+    css = (Path(__file__).resolve().parent / "style.css").read_text(encoding="utf-8")
+
+    return f"""<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Amt &amp; Ordnung — Prototyp</title>
+<style>
+{css}
+</style>
+</head>
+<body>
+{"".join(sheets)}
+</body>
+</html>""", placeholders
+
+
+def main() -> None:
+    data = json.loads((ROOT / "data" / "cards.json").read_text(encoding="utf-8"))
+
+    art_gen.build(ROOT / "art")
+
+    out_html = ROOT / "build" / "cards.html"
+    out_html.parent.mkdir(parents=True, exist_ok=True)
+    markup, placeholders = build_html(data["cards"])
+    out_html.write_text(markup, encoding="utf-8")
+
+    deck = expand(data["cards"])
+    pdf_path = ROOT / "out" / "amt-und-ordnung-karten.pdf"
+    pdf_path.parent.mkdir(parents=True, exist_ok=True)
+
+    from playwright.sync_api import sync_playwright
+
+    with sync_playwright() as p:
+        browser = p.chromium.launch(channel="chrome")
+        page = browser.new_page()
+        page.goto(out_html.as_uri())
+        page.emulate_media(media="print")
+        page.pdf(
+            path=str(pdf_path),
+            format="A4",
+            print_background=True,
+            prefer_css_page_size=True,
+            margin={"top": "0", "right": "0", "bottom": "0", "left": "0"},
+        )
+        browser.close()
+
+    pages = (len(deck) + PER_SHEET - 1) // PER_SHEET
+    print(f"Deck:   {len(deck)} Karten aus {len(data['cards'])} Typen")
+    print(f"Seiten: {pages}")
+    if placeholders:
+        print(f"Artwork: {len(placeholders)} Motive sind noch SVG-Platzhalter "
+              f"(siehe art/PROMPTS.md):")
+        for name in placeholders:
+            print(f"         - {name}")
+    else:
+        print("Artwork: alle Motive sind echte Bilder")
+    print(f"HTML:   {out_html}")
+    print(f"PDF:    {pdf_path}  ({pdf_path.stat().st_size // 1024} KB)")
+
+
+if __name__ == "__main__":
+    main()

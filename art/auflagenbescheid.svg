@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 170"
+  shape-rendering="geometricPrecision"><defs>
+  <filter id="ink" x="-8%" y="-8%" width="116%" height="116%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.026" numOctaves="3" seed="11" result="n"/>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="3.4" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+  <pattern id="dots" width="10" height="10" patternUnits="userSpaceOnUse">
+    <circle cx="2" cy="2" r="1.5" fill="#1C1B18" opacity="0.20"/>
+  </pattern>
+  <pattern id="hatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(42)">
+    <line x1="0" y1="0" x2="0" y2="7" stroke="#1C1B18" stroke-width="1.5" opacity="0.42"/>
+  </pattern>
+  <pattern id="hatch2" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(-38)">
+    <line x1="0" y1="0" x2="0" y2="8" stroke="#1C1B18" stroke-width="1.2" opacity="0.26"/>
+  </pattern>
+</defs>
+<rect width="300" height="170" fill="#E5CBC3"/>
+<g opacity="0.5">
+  <path d="M150 120 L-30 -40 L40 -60 Z" fill="#fff" opacity="0.55"/>
+  <path d="M150 120 L340 -30 L300 -70 Z" fill="#fff" opacity="0.55"/>
+  <path d="M150 120 L120 200 L40 190 Z" fill="#1C1B18" opacity="0.10"/>
+  <path d="M150 120 L250 210 L330 175 Z" fill="#1C1B18" opacity="0.10"/>
+</g>
+<rect x="0" y="0" width="300" height="170" fill="url(#dots)" opacity="0.7"/>
+<rect x="0" y="142" width="300" height="28" fill="url(#hatch2)" opacity="0.55"/>
+
+  <g filter="url(#ink)">
+    <ellipse cx="150" cy="150" rx="74" ry="9" fill="url(#hatch)" opacity="0.55" stroke="none"/>
+    <g stroke="#1C1B18" stroke-width="4.6" stroke-linejoin="round" stroke-linecap="round">
+
+  <g transform="rotate(-5 150 90)">
+    <rect x="96" y="22" width="108" height="126" rx="3" fill="#F4F1E8"/>
+    <line x1="112" y1="48" x2="188" y2="48" stroke-width="5"/>
+    <line x1="112" y1="62" x2="188" y2="62" stroke-width="3" opacity="0.55"/>
+    <line x1="112" y1="72" x2="176" y2="72" stroke-width="3" opacity="0.55"/>
+    <line x1="112" y1="82" x2="188" y2="82" stroke-width="3" opacity="0.55"/>
+    <line x1="112" y1="92" x2="164" y2="92" stroke-width="3" opacity="0.55"/>
+    <line x1="112" y1="126" x2="150" y2="126" stroke-width="2" opacity="0.4"/>
+  </g>
+  <circle cx="196" cy="118" r="30" fill="none" stroke="#A8322F" stroke-width="7" opacity="0.9"/>
+  <path d="M196 104 v16" stroke="#A8322F" stroke-width="7"/>
+  <path d="M196 128 v2" stroke="#A8322F" stroke-width="8"/>
+  <path d="M62 44 L92 96 H32 Z" fill="#fff" stroke-width="4"/>
+  <path d="M62 62 v18" stroke-width="5"/>
+  <path d="M62 88 v2" stroke-width="6"/>
+
+    </g>
+  </g></svg>
